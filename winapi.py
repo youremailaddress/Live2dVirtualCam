@@ -1,7 +1,7 @@
 '''
  @Date: 2022-05-18 14:59:36
  @LastEditors: Wu Han
- @LastEditTime: 2022-05-18 22:30:04
+ @LastEditTime: 2022-05-18 22:43:58
  @FilePath: \test\winapi.py
 '''
 import win32gui
@@ -14,6 +14,38 @@ from PIL import Image, ImageGrab
 import pyvirtualcam
 import numpy as np
 import d3dshot
+
+from ctypes import windll, wintypes
+
+GWL_STYLE = -16
+GWL_EXSTYLE = -20
+WS_CHILD = 0x40000000
+WS_EX_APPWINDOW = 0x00040000
+WS_EX_TOOLWINDOW = 0x00000080
+WS_EX_NOACTIVATE = 0x08000000
+
+SWP_FRAMECHANGED = 0x0020
+SWP_NOACTIVATE = 0x0010
+SWP_NOMOVE = 0x0002
+SWP_NOSIZE = 0x0001
+
+# write short names for functions and specify argument and return types
+GetWindowLong = windll.user32.GetWindowLongW
+GetWindowLong.restype = wintypes.ULONG
+GetWindowLong.argtpes = (wintypes.HWND, wintypes.INT)
+
+SetWindowLong = windll.user32.SetWindowLongW
+SetWindowLong.restype = wintypes.ULONG
+SetWindowLong.argtpes = (wintypes.HWND, wintypes.INT, wintypes.ULONG)
+
+SetWindowPos = windll.user32.SetWindowPos
+
+def set_no_focus(hwnd):
+    style = GetWindowLong(hwnd, GWL_EXSTYLE) # get existing style
+    style = style & ~WS_EX_TOOLWINDOW # remove toolwindow style
+    style = style | WS_EX_NOACTIVATE | WS_EX_APPWINDOW
+    res = SetWindowLong(hwnd, GWL_EXSTYLE, style)
+    res = SetWindowPos(hwnd, 0, 0,0,0,0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOSIZE)
 
 def get_all_hwnd(hwnd, mouse):
     if (win32gui.IsWindow(hwnd) and
@@ -90,6 +122,20 @@ def resize(image_pil, width, height):
 def m():
     os.popen('taskkill.exe /F /pid:'+str(os.getpid()))
 
+hwnd_map = {}
+win32gui.EnumWindows(get_all_hwnd, 0)
+Final_h = None
+Final_t = None
+for h, t in hwnd_map.items():
+    if t :
+        if 'ababa' in t:
+            win32gui.BringWindowToTop(h)
+            shell = win32com.client.Dispatch("WScript.Shell")
+            shell.SendKeys('%')
+            set_no_focus(h)
+            win32gui.ShowWindow(h, win32con.SW_RESTORE)
+            Final_h,Final_t = h,t
+            break
 keyboard.add_hotkey("ctrl + alt + space", m)
 d = d3dshot.create()
 with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
@@ -106,6 +152,7 @@ with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
                         shell.SendKeys('%')
                         # 被其他窗口遮挡，调用后放到最前面
                         win32gui.SetForegroundWindow(h)
+                        set_no_focus(h)
                         # 解决被最小化的情况
                         win32gui.ShowWindow(h, win32con.SW_RESTORE)
                         (x1, y1, x2, y2) = get_window_rect(h)

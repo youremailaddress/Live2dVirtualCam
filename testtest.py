@@ -1,7 +1,7 @@
 '''
  @Date: 2022-05-18 22:12:08
  @LastEditors: Wu Han
- @LastEditTime: 2022-05-18 22:32:58
+ @LastEditTime: 2022-05-18 22:49:31
  @FilePath: \test\testtest.py
 '''
 import tkinter as tk
@@ -48,18 +48,25 @@ def set_no_focus(hwnd):
     res = SetWindowLong(hwnd, GWL_EXSTYLE, style)
     res = SetWindowPos(hwnd, 0, 0,0,0,0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOSIZE)
 
-def push_me():
-    print('you pushed me!')
-
-def focus_me(event):
-    root.focus_force()
+# hwnd_map = {}
+# win32gui.EnumWindows(get_all_hwnd, 0)
+# Final_h = None
+# Final_t = None
+# for h, t in hwnd_map.items():
+#     if t :
+#         if 'ababa' in t:
+#             win32gui.BringWindowToTop(h)
+#             shell = win32com.client.Dispatch("WScript.Shell")
+#             shell.SendKeys('%')
+#             set_no_focus(h)
+#             win32gui.ShowWindow(h, win32con.SW_RESTORE)
+#             Final_h,Final_t = h,t
+#             break
 
 root = tk.Tk()
 root.wm_attributes("-topmost", 1)
-tk.Button(root, text="Push me", command=push_me).pack()
 e = tk.Entry(root)
-e.pack()
-e.bind('<Button-1>', focus_me) # if we have a widget that must have focus it needs to be bound
+# e.pack()
 root.update() # for some reason, window style is messed with after window creation, update to get past this
 hwnd = find_root_window(root)
 if hwnd:
