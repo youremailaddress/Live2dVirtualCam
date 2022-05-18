@@ -1,7 +1,7 @@
 '''
  @Date: 2022-05-18 14:59:36
  @LastEditors: Wu Han
- @LastEditTime: 2022-05-18 20:19:37
+ @LastEditTime: 2022-05-18 22:30:04
  @FilePath: \test\winapi.py
 '''
 import win32gui
@@ -13,6 +13,7 @@ import winreg,ctypes
 from PIL import Image, ImageGrab
 import pyvirtualcam
 import numpy as np
+import d3dshot
 
 def get_all_hwnd(hwnd, mouse):
     if (win32gui.IsWindow(hwnd) and
@@ -90,6 +91,7 @@ def m():
     os.popen('taskkill.exe /F /pid:'+str(os.getpid()))
 
 keyboard.add_hotkey("ctrl + alt + space", m)
+d = d3dshot.create()
 with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
     while True:
         try:
@@ -107,7 +109,7 @@ with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
                         # 解决被最小化的情况
                         win32gui.ShowWindow(h, win32con.SW_RESTORE)
                         (x1, y1, x2, y2) = get_window_rect(h)
-                        img_ready = ImageGrab.grab((x1+5, y1+50, x2-20, y2-20))
+                        img_ready = d.screenshot((x1+5, y1+50, x2-20, y2-20))
                         # img_ready = img_ready.transpose(Image.FLIP_LEFT_RIGHT)
                         img_ready = resize(img_ready, cam.width, cam.height)
                         img_4 = img_ready.convert("RGBA")
