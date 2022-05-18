@@ -1,0 +1,54 @@
+<!--
+ * @Date: 2022-05-17 15:57:48
+ * @LastEditors: Wu Han
+ * @LastEditTime: 2022-05-18 12:15:14
+ * @FilePath: \test\templates\index.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>ababa</title>
+  <meta name="viewport"
+    content="viewport-fit=cover, user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+  <link rel="shortcut icon" href="https://yeemachine.github.io/kalidoface-live2d-models/Icons/icon-circle.svg" />
+  <!--     Live2D SDK  -->
+
+  <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+  <!--     PixiJS Renderer -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.1.3/pixi.min.js"></script>
+  <!--     PixiJS Live2D Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
+  <!--     Mediapipe or Tensorflow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+  <!--     Mediapipe Drawing Tools -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <!--     Mediapipe Camera Tools -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <!--     Kalidokit Kinematic Solver -->
+  <script src="https://cdn.jsdelivr.net/npm/kalidokit@1.1/dist/kalidokit.umd.js"></script>
+
+  <link rel="stylesheet" href="../static/style.css" />
+</head>
+
+<body>
+  <div class="preview" style="display: none;">
+    <video class="input_video" width="1280px" height="720px" autoplay muted playsinline></video>
+    <canvas class="guides"></canvas>
+    <section>
+      <a class="current" href="https://glitch.com/edit/#!/kalidokit-live2d">
+        <p>Live2D</p>
+      </a>
+      <a href="https://kalidokit.glitch.me">
+        <p>VRM</p>
+      </a>
+    </section>
+  </div>
+  <canvas id="live2d"></canvas>
+  <script type="module" src="../static/script.js"></script>
+</body>
+
+</html>
