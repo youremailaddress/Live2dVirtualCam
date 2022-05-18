@@ -1,51 +1,31 @@
 '''
  @Date: 2022-05-18 14:59:36
  @LastEditors: Wu Han
- @LastEditTime: 2022-05-18 22:43:58
+ @LastEditTime: 2022-05-19 03:05:44
  @FilePath: \test\winapi.py
 '''
 import win32gui
 import win32con
-import win32com.client
-import keyboard,sys,os,subprocess
+import sys,os,subprocess
 import time
 import winreg,ctypes
-from PIL import Image, ImageGrab
+from PIL import Image
 import pyvirtualcam
 import numpy as np
 import d3dshot
 
-from ctypes import windll, wintypes
+def check_if_install_obs():
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "CLSID\{27B05C2D-93DC-474A-A5DA-9BBA34CB2A9C}\InprocServer32")
+        return 1
+    except FileNotFoundError:
+        return 0
 
-GWL_STYLE = -16
-GWL_EXSTYLE = -20
-WS_CHILD = 0x40000000
-WS_EX_APPWINDOW = 0x00040000
-WS_EX_TOOLWINDOW = 0x00000080
-WS_EX_NOACTIVATE = 0x08000000
+def install_obs():
+    os.system("OBS-VirtualCam2.0.4-Installer.exe")
 
-SWP_FRAMECHANGED = 0x0020
-SWP_NOACTIVATE = 0x0010
-SWP_NOMOVE = 0x0002
-SWP_NOSIZE = 0x0001
-
-# write short names for functions and specify argument and return types
-GetWindowLong = windll.user32.GetWindowLongW
-GetWindowLong.restype = wintypes.ULONG
-GetWindowLong.argtpes = (wintypes.HWND, wintypes.INT)
-
-SetWindowLong = windll.user32.SetWindowLongW
-SetWindowLong.restype = wintypes.ULONG
-SetWindowLong.argtpes = (wintypes.HWND, wintypes.INT, wintypes.ULONG)
-
-SetWindowPos = windll.user32.SetWindowPos
-
-def set_no_focus(hwnd):
-    style = GetWindowLong(hwnd, GWL_EXSTYLE) # get existing style
-    style = style & ~WS_EX_TOOLWINDOW # remove toolwindow style
-    style = style | WS_EX_NOACTIVATE | WS_EX_APPWINDOW
-    res = SetWindowLong(hwnd, GWL_EXSTYLE, style)
-    res = SetWindowPos(hwnd, 0, 0,0,0,0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOSIZE)
+def run_app():
+    subprocess.Popen(["python","app.py"])
 
 def get_all_hwnd(hwnd, mouse):
     if (win32gui.IsWindow(hwnd) and
@@ -60,6 +40,7 @@ _browser_regs = {
     '360': r"SOFTWARE\Clients\StartMenuInternet\360Chrome\DefaultIcon",
     'IE': r"SOFTWARE\Clients\StartMenuInternet\IEXPLORE.EXE\DefaultIcon",
 }
+# 电脑上只有前两个 后面的没测试过
 
 def get_window_rect(hwnd):
     try:
@@ -88,17 +69,6 @@ def get_browser_path(browser):
     value, _type = winreg.QueryValueEx(key, "")
     return value.split(',')[0]
 
-for browser in ["chrome","edge","firefox","360","IE"]:
-    path = get_browser_path(browser)
-    if path != None:
-        break
-if path == None:
-    print("No browser found!")
-    exit(-1)
-
-cmd = '"{}" --app="{}"'.format(path,"data:text/html,<html><body><script>window.moveTo(1980,700);window.resizeTo(500,500);window.location='http://127.0.0.1:8086';</script></body></html>")
-os.popen(cmd)
-
 def resize(image_pil, width, height):
     '''
     Resize PIL image keeping ratio and using white background.
@@ -119,52 +89,52 @@ def resize(image_pil, width, height):
     background.paste(image_resize, offset)
     return background.convert('RGB')
 
-def m():
-    os.popen('taskkill.exe /F /pid:'+str(os.getpid()))
-
-hwnd_map = {}
-win32gui.EnumWindows(get_all_hwnd, 0)
-Final_h = None
-Final_t = None
-for h, t in hwnd_map.items():
-    if t :
-        if 'ababa' in t:
-            win32gui.BringWindowToTop(h)
-            shell = win32com.client.Dispatch("WScript.Shell")
-            shell.SendKeys('%')
-            set_no_focus(h)
-            win32gui.ShowWindow(h, win32con.SW_RESTORE)
-            Final_h,Final_t = h,t
+if __name__ == "__main__":
+    print("[Info] 检查是否安装 Obs-Virtual-Cam...")
+    if not check_if_install_obs():
+        print("[Warning] 找不到 Obs 设备.请先安装驱动")
+        install_obs()
+        print("[Info] Obs 安装成功")
+    print("[Info] 是")
+    print("[Info] 开始检查浏览器...")
+    for browser in ["chrome","edge"]:
+        path = get_browser_path(browser)
+        if path != None:
             break
-keyboard.add_hotkey("ctrl + alt + space", m)
-d = d3dshot.create()
-with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
-    while True:
-        try:
-            hwnd_map = {}
-            win32gui.EnumWindows(get_all_hwnd, 0)
-            for h, t in hwnd_map.items():
-                if t :
-                    if 'ababa' in t:
-                        # h 为想要放到最前面的窗口句柄
-                        win32gui.BringWindowToTop(h)
-                        shell = win32com.client.Dispatch("WScript.Shell")
-                        shell.SendKeys('%')
-                        # 被其他窗口遮挡，调用后放到最前面
-                        win32gui.SetForegroundWindow(h)
-                        set_no_focus(h)
-                        # 解决被最小化的情况
-                        win32gui.ShowWindow(h, win32con.SW_RESTORE)
-                        (x1, y1, x2, y2) = get_window_rect(h)
-                        img_ready = d.screenshot((x1+5, y1+50, x2-20, y2-20))
-                        # img_ready = img_ready.transpose(Image.FLIP_LEFT_RIGHT)
-                        img_ready = resize(img_ready, cam.width, cam.height)
-                        img_4 = img_ready.convert("RGBA")
-                        img_4 = np.array(img_4,dtype=np.uint8)
-                        cam.send(img_4)
-                        cam.sleep_until_next_frame()
-        except Exception as e:
-            print(str(e))
-            pass
-        # time.sleep(1/60)
-        
+    if path == None:
+        print("[Fatal] 找不到支持的浏览器！")
+        exit(-1)
+    print("[Info] 浏览器路径 {}".format(path))
+    print("[Info] 开始 web 服务器...")
+    run_app()
+    time.sleep(1)
+    print("[Info] 开始打开浏览器...")
+    cmd = '"{}" --app="{}"'.format(path,"data:text/html,<html><body><script>window.moveTo(1980,700);window.resizeTo(500,500);window.location='http://127.0.0.1:8086';</script></body></html>")
+    os.popen(cmd)
+    print("[Info] 等待浏览器加载完成...")
+    time.sleep(5)
+    print("[Info] 浏览器加载完成...")
+    hwnd_map = {}
+    win32gui.EnumWindows(get_all_hwnd, 0)
+    d = d3dshot.create()
+    with pyvirtualcam.Camera(width=1280, height=720, fps=30) as cam:
+        while True:
+            try:
+                for h, t in hwnd_map.items():
+                    if t :
+                        if 'ababa' in t:
+                            win32gui.ShowWindow(h, win32con.SW_RESTORE)
+                            win32gui.SetWindowPos(h, win32con.HWND_TOPMOST, 0, 0, 0, 0,
+                                            win32con.SWP_NOMOVE | win32con.SWP_NOACTIVATE | win32con.SWP_NOOWNERZORDER | win32con.SWP_SHOWWINDOW | win32con.SWP_NOSIZE)
+                            (x1, y1, x2, y2) = get_window_rect(h)
+                            img_ready = d.screenshot((x1+5, y1+50, x2-20, y2-20))
+                            img_ready = resize(img_ready, cam.width, cam.height)
+                            img_4 = img_ready.convert("RGBA")
+                            img_4 = np.array(img_4,dtype=np.uint8)
+                            cam.send(img_4)
+                            cam.sleep_until_next_frame()
+            except Exception as e:
+                if isinstance(e,BaseException):
+                    print("[Info] 窗口已关闭")
+                    exit(0)
+                pass

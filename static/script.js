@@ -74,7 +74,7 @@ const {
     // create media pipe facemesh instance
     facemesh = new FaceMesh({
       locateFile: file => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        return `../static/${file}`;
       }
     });
   
