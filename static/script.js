@@ -15,8 +15,10 @@ const {
   // Url to Live2D
   // const modelUrl =
   //   "../static/gongzi/gongzi.model3.json";
+  // const modelUrl = 
+  //      "../static/hiyori/hiyori_free_t08.model3.json"
   const modelUrl = 
-       "../static/hiyori/hiyori_free_t08.model3.json"
+       "../static/hutao/Hu Tao.model3.json"
   
   let currentModel, facemesh;
   
