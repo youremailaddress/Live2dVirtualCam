@@ -1,7 +1,7 @@
 <!--
  * @Date: 2022-05-19 15:40:47
  * @LastEditors: Wu Han
- * @LastEditTime: 2022-05-19 17:06:23
+ * @LastEditTime: 2022-05-19 17:08:20
  * @FilePath: \test\readme.md
 -->
 # Live2d 动捕虚拟摄像头
@@ -59,3 +59,9 @@ obs&facerig 太大了并且学习成本比较高（<del>更重要的是不够 ge
 - [胡桃模型原作](https://github.com/zeankundev/HuTao-Live2D)
 - [hiyori原作](https://github.com/KennardWang/VTuber-MomoseHiyori)
 - [达达利亚原作](https://www.bilibili.com/s/video/BV1h5411w754)
+
+## todo
+
+龚 sir 似乎很感兴趣 后面说不定会探讨不占用桌面 or 更原生 or 跨平台的实现途径 <del>总之还是先熬过期末吧</del>
+
+有问题 可以开 issues
